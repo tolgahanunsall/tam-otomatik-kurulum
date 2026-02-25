@@ -4,6 +4,16 @@
 # Bu dosyayi 'config.yaml' olarak kopyalayin ve degerlerinizi girin.
 # Copy this file as 'config.yaml' and fill in your values.
 
+# --- Lisans / License ---
+# Free tier: 1 vault, 1 hedef (GitHub VEYA Dropbox), sadece gunluk yedekleme, Notion yok
+# Premium tier: Sinirsiz vault, tum hedefler, tum sikliklar, Notion destegi
+license:
+  # Tier: "free" veya "premium"
+  tier: "free"
+  # Premium lisans anahtari (Premium kullanicilar icin)
+  # Lisans anahtari almak icin: https://github.com/YOUR_USERNAME/note-backup-tool#premium
+  key: ""
+
 # --- Genel Ayarlar / General Settings ---
 general:
   # Yedekleme dizini (gecici dosyalar icin)
@@ -34,9 +44,9 @@ sources:
       - ".obsidian/workspace-mobile.json"
       - ".trash/"
   
-  # Notion Yedekleme
+  # Notion Yedekleme (Sadece Premium)
   notion:
-    enabled: false
+    enabled: false  # Premium gerektirir
     # Notion Integration Token (https://www.notion.so/my-integrations)
     api_token: "YOUR_NOTION_API_TOKEN"
     # Yedeklenecek sayfa/veritabani ID'leri (bos = tumu)

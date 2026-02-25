@@ -16,6 +16,34 @@ Obsidian vault'larinizi ve Notion sayfalarinizi otomatik olarak GitHub ve/veya D
 - **Otomatik Zamanlama** - cron (Linux), launchd (macOS), Task Scheduler (Windows)
 - **Esnek Yapilandirma** - YAML tabanli kolay konfigrasyon
 - **Akilli Haric Tutma** - Gereksiz dosyalari (cache, workspace vb.) otomatik atla
+- **Free / Premium Plan** - Ucretsiz kisitli kullanim veya Premium tam erisim
+
+---
+
+## Free vs Premium
+
+| Ozellik | Free (Ucretsiz) | Premium |
+|---------|:----------------:|:-------:|
+| Obsidian vault sayisi | 1 | Sinirsiz |
+| Yedekleme hedefi | 1 (GitHub VEYA Dropbox) | Sinirsiz (GitHub + Dropbox) |
+| Zamanlama sikligi | Sadece gunluk | Saatlik, Gunluk, Haftalik |
+| Notion yedekleme | - | Desteklenir |
+| Dosyaya log yazma | - | Desteklenir |
+
+### Premium Aktivasyonu
+
+`config.yaml` dosyanizda `license` bolumunu yapilandirin:
+
+```yaml
+license:
+  tier: "premium"
+  key: "NBT-PREMIUM-XXXXXXXXXXXXXXXX"
+```
+
+Plan bilginizi kontrol etmek icin:
+```bash
+python backup.py tier
+```
 
 ---
 
@@ -232,9 +260,13 @@ sources:
         path: "D:/ObsidianVaults/Projeler"  # Windows
 ```
 
-### Hem GitHub Hem Dropbox
+### Hem GitHub Hem Dropbox (Premium)
 
 ```yaml
+license:
+  tier: "premium"
+  key: "NBT-PREMIUM-XXXXXXXXXXXXXXXX"
+
 targets:
   github:
     enabled: true
@@ -248,7 +280,7 @@ targets:
     remote_path: "/NoteBackups"
 ```
 
-### Haftalik Yedekleme
+### Haftalik Yedekleme (Premium)
 
 ```yaml
 schedule:
@@ -257,7 +289,7 @@ schedule:
   weekly_day: 6  # Pazar gunu (0=Pazartesi, 6=Pazar)
 ```
 
-### Saatlik Yedekleme
+### Saatlik Yedekleme (Premium)
 
 ```yaml
 schedule:
@@ -281,6 +313,7 @@ note-backup-tool/
 ├── src/
 │   ├── __init__.py
 │   ├── config.py                  # Yapilandirma yukleyici
+│   ├── tier.py                    # Free/Premium plan yonetimi
 │   ├── logger.py                  # Log sistemi
 │   ├── sources/
 │   │   ├── obsidian.py            # Obsidian vault yedekleme
@@ -300,6 +333,13 @@ note-backup-tool/
 ---
 
 ## Sorun Giderme
+
+### "Tier kisitlamasi" hatasi
+- Free tier'de 1'den fazla vault, 1'den fazla hedef veya saatlik/haftalik zamanlama kullanamazsiniz
+- Notion yedeklemesi icin Premium gerekir
+- `python backup.py tier` ile mevcut planinizi kontrol edin
+- Premium'a yukseltmek icin config.yaml'da `license` bolumunu yapilandirin
+
 
 ### "Config file not found" hatasi
 ```bash

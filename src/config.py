@@ -7,6 +7,8 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
+from src.tier import TierManager, TierError
+
 
 DEFAULT_CONFIG_PATHS = [
     "config.yaml",
@@ -28,6 +30,7 @@ class Config:
         self._data: Dict[str, Any] = {}
         self._config_path = config_path
         self._load()
+        self._tier_manager = TierManager(self._data)
 
     def _find_config_file(self) -> str:
         """Find the configuration file."""
@@ -94,6 +97,39 @@ class Config:
 
         if not any_target:
             raise ConfigError("At least one target (github or dropbox) must be enabled.")
+
+    def validate_tier_restrictions(self) -> None:
+        """Validate configuration against tier restrictions.
+
+        Called after tier manager is initialized to enforce limits.
+
+        Raises:
+            TierError: If any tier restriction is violated.
+        """
+        tier = self._tier_manager
+
+        # Check vault limit
+        obsidian_cfg = self.sources.get("obsidian", {})
+        if obsidian_cfg.get("enabled", False):
+            vault_count = len(obsidian_cfg.get("vaults", []))
+            tier.enforce_vault_limit(vault_count)
+
+        # Check Notion access
+        notion_cfg = self.sources.get("notion", {})
+        if notion_cfg.get("enabled", False):
+            tier.enforce_notion_access()
+
+        # Check target limit
+        enabled_targets = 0
+        if self.targets.get("github", {}).get("enabled", False):
+            enabled_targets += 1
+        if self.targets.get("dropbox", {}).get("enabled", False):
+            enabled_targets += 1
+        tier.enforce_target_limit(enabled_targets)
+
+        # Check schedule frequency
+        frequency = self.schedule.get("frequency", "daily")
+        tier.enforce_frequency(frequency)
 
     def _validate_obsidian(self, cfg: Dict[str, Any]) -> None:
         """Validate Obsidian configuration."""
@@ -205,3 +241,8 @@ class Config:
         """Get Dropbox target config if enabled."""
         cfg = self.targets.get("dropbox", {})
         return cfg if cfg.get("enabled", False) else None
+
+    @property
+    def tier_manager(self) -> TierManager:
+        """Get the tier manager instance."""
+        return self._tier_manager

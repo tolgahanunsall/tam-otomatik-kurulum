@@ -28,6 +28,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.config import Config, ConfigError
 from src.logger import setup_logger
+from src.tier import TierError
 
 
 def run_backup(config: Config) -> bool:
@@ -48,7 +49,15 @@ def run_backup(config: Config) -> bool:
     logger.info("Note Backup Tool - Yedekleme baslatiliyor...")
     logger.info("Tarih: %s", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     logger.info("Platform: %s", platform.system())
+    logger.info("Plan: %s", config.tier_manager.tier_display)
     logger.info("=" * 60)
+
+    # Enforce tier restrictions
+    try:
+        config.validate_tier_restrictions()
+    except TierError as e:
+        logger.error("Tier kisitlamasi: %s", e)
+        return False
 
     # Create temporary backup directory
     backup_base = config.backup_dir
@@ -213,6 +222,7 @@ Ornekler:
   python backup.py schedule install       Otomatik yedekleme kur
   python backup.py schedule remove        Zamanlamayi kaldir
   python backup.py schedule status        Zamanlama durumunu goster
+  python backup.py tier                   Plan bilgisini goster
         """,
     )
 
@@ -229,8 +239,10 @@ Ornekler:
         help="Ayrintili log ciktisi",
     )
 
-    # Schedule subcommand
+    # Subcommands
     subparsers = parser.add_subparsers(dest="command")
+
+    # Schedule subcommand
     schedule_parser = subparsers.add_parser(
         "schedule",
         help="Otomatik zamanlama yonetimi",
@@ -239,6 +251,12 @@ Ornekler:
         "schedule_action",
         choices=["install", "remove", "status"],
         help="Zamanlama islemi: install, remove, status",
+    )
+
+    # Tier info subcommand
+    subparsers.add_parser(
+        "tier",
+        help="Mevcut plan bilgisini goster (Free/Premium)",
     )
 
     args = parser.parse_args()
@@ -255,7 +273,17 @@ Ornekler:
 
     # Route to appropriate handler
     if args.command == "schedule":
+        # Enforce frequency restriction before installing schedule
+        try:
+            config.tier_manager.enforce_frequency(
+                config.schedule.get("frequency", "daily")
+            )
+        except TierError as e:
+            print(f"\n[TIER KISITLAMASI] {e}", file=sys.stderr)
+            sys.exit(1)
         handle_schedule(args, config)
+    elif args.command == "tier":
+        config.tier_manager.print_tier_info()
     else:
         success = run_backup(config)
         sys.exit(0 if success else 1)
