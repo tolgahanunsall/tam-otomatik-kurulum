@@ -1,0 +1,82 @@
+# ============================================================
+# Note Backup Tool - Yapilandirma Dosyasi / Configuration File
+# ============================================================
+# Bu dosyayi 'config.yaml' olarak kopyalayin ve degerlerinizi girin.
+# Copy this file as 'config.yaml' and fill in your values.
+
+# --- Genel Ayarlar / General Settings ---
+general:
+  # Yedekleme dizini (gecici dosyalar icin)
+  # Backup directory (for temporary files)
+  backup_dir: "~/note-backups"
+  
+  # Log seviyesi: DEBUG, INFO, WARNING, ERROR
+  log_level: "INFO"
+  
+  # Log dosyasi yolu (bos birakilirsa konsola yazilir)
+  log_file: "~/note-backups/logs/backup.log"
+
+# --- Kaynaklar / Sources ---
+sources:
+  # Obsidian Vault Yedekleme
+  obsidian:
+    enabled: true
+    # Vault dizinleri listesi
+    vaults:
+      - name: "MyVault"
+        path: "~/Documents/ObsidianVaults/MyVault"
+      # - name: "WorkVault"
+      #   path: "~/Documents/ObsidianVaults/WorkVault"
+    
+    # Haric tutulacak dosya/klasor kaliplari
+    exclude_patterns:
+      - ".obsidian/workspace.json"
+      - ".obsidian/workspace-mobile.json"
+      - ".trash/"
+  
+  # Notion Yedekleme
+  notion:
+    enabled: false
+    # Notion Integration Token (https://www.notion.so/my-integrations)
+    api_token: "YOUR_NOTION_API_TOKEN"
+    # Yedeklenecek sayfa/veritabani ID'leri (bos = tumu)
+    page_ids: []
+    database_ids: []
+    # Export formati: "markdown" veya "html"
+    export_format: "markdown"
+
+# --- Hedefler / Targets ---
+targets:
+  # GitHub Yedekleme
+  github:
+    enabled: true
+    # GitHub Personal Access Token
+    token: "YOUR_GITHUB_TOKEN"
+    # Hedef repository (ornek: "kullanici/obsidian-backup")
+    repository: "YOUR_USERNAME/obsidian-backup"
+    # Branch adi
+    branch: "main"
+    # Commit mesaji sablonu ({date} otomatik degistirilir)
+    commit_message: "Otomatik yedekleme: {date}"
+  
+  # Dropbox Yedekleme
+  dropbox:
+    enabled: false
+    # Dropbox API Access Token
+    access_token: "YOUR_DROPBOX_ACCESS_TOKEN"
+    # Dropbox Refresh Token (uzun sureli erisim icin)
+    refresh_token: ""
+    # Dropbox App Key ve Secret
+    app_key: ""
+    app_secret: ""
+    # Dropbox'taki hedef klasor
+    remote_path: "/NoteBackups"
+
+# --- Zamanlama / Scheduling ---
+schedule:
+  # Yedekleme zamani (24 saat formati)
+  time: "03:00"
+  # Yedekleme sikligi: "daily", "hourly", "weekly"
+  frequency: "daily"
+  # Haftalik yedekleme icin gun (0=Pazartesi, 6=Pazar)
+  weekly_day: 0
